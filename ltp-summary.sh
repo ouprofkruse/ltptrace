@@ -22,15 +22,16 @@ OF="ltp-summary.txt"
 #       UDP ports
 #       LTP session number
 #       LTP offset of data being sent
+#       LTP data segment length
 #       LTP type as hex
-#       -- for report seghements:
+#       -- for report segments:
 #       Report claim counts
 #       Offset for each claim
 #       Length for each claim
 #   The "ltp" argumntents filter on the LTP protocol
 #
 tshark -r $1 -2 -T fields -e frame.number -e frame.time_epoch -e ip.addr -e udp.port \
- -e ltp.session.number -e ltp.data.offset -e ltp.type -e ltp.rpt.clm.cnt -e ltp.rpt.clm.off -e ltp.rpt.clm.len \
+ -e ltp.session.number -e ltp.data.offset -e ltp.data.length -e ltp.type -e ltp.rpt.clm.cnt -e ltp.rpt.clm.off -e ltp.rpt.clm.len \
  ltp > $OF
 # *** need proper output file naming
 echo "Out saved in $OF"
