@@ -37,7 +37,8 @@ OF="$OF.summary"
 #   The "ltp" argumntents filter on the LTP protocol
 #
 tshark -r $1 -2 -T fields -e frame.number -e frame.time_epoch -e ip.addr -e udp.port \
- -e ltp.session.number -e ltp.data.offset -e ltp.data.length -e ltp.type -e ltp.rpt.clm.cnt -e ltp.rpt.clm.off -e ltp.rpt.clm.len \
+ -e ltp.session.number -e ltp.data.offset -e ltp.data.length -e ltp.type -e ltp.rpt.clm.cnt \
+ -e ltp.rpt.clm.off -e ltp.rpt.clm.len \
  -e ltp.data.chkp -e ltp.rpt.chkp -e ltp.rpt.ub -e ltp.rpt.sno -e ltp.rpt.ack.sno  \
  ltp > $OF
 # *** need proper output file naming
