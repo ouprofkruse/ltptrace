@@ -1,4 +1,19 @@
 # LTP Trace -- Hans Kruse 2023
+""" 
+    Input: text file created by ltp-summary.sh
+    Output: Summary of sessions found, and an xplot formatted file similar to the
+    tcptrace time-sequence graph.
+    Version 0.8.0
+    - Sessions are processed in order of the time of the first segment in the session
+    - In the graph, the cumulative data seen in previous sessions is added to data offsets to
+        shift the segement indicators up on the y axis
+    Missing/Limitations in 0.8.0
+    - Green and Red data are not distinguished
+    - Report acknowledgements are not processed
+    - Checkpoints are not indicated on the graph
+    - Cancel segments are not processed or graphed
+    - ltptrace records the IP of the sender of the first segment and processes only sessions from the IP
+"""
 # Segment type list from RFC 5326
 """
    CTRL EXC Flag 1 Flag 0 Code  Nature of segment
@@ -31,6 +46,8 @@
 import sys
 import os
 from operator import itemgetter
+
+VERSION = "0.8.0"
 
 #status and error messages
 MSGLIST = ["Only sessions to/from the first IP found are analyzed", \
@@ -99,7 +116,7 @@ class SessionData:
             self.dtime_min=min(segment.time,self.dtime_min)
             self.dtime_max=max(segment.time,self.dtime_max)
 
-
+print("ltptrace version",VERSION)
 segList = []
 session_list = {}
 if (len(sys.argv) < 2):
