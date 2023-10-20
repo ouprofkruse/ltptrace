@@ -68,6 +68,11 @@ class Segment:
         self.type=int(items[7],0)
         if self.type >=12:
             MSGSTATUS[2]=True
+#Extract flag values
+        type_bits = f'{self.type:04b}'
+        self.ctrl = type_bits[0] == "1"
+        self.exc = type_bits[1] == "1"
+#
         ips=items[2].split(",")
         self.ports=items[3].split(",")
         if self.type < 8 or self.type == 9 or self.type == 12 or self.type == 15:
@@ -84,7 +89,7 @@ class Segment:
             self.session = -1
         else:
             self.session=int(items[4])
-
+#        print(self.session,self.ctrl)
         if self.type < 8:
             self.offset=int(items[5])
             self.length=int(items[6])
