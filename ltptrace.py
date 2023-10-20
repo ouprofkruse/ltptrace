@@ -47,7 +47,7 @@ import sys
 import os
 from operator import itemgetter
 
-VERSION = "0.8.0"
+VERSION = "0.8.1"
 
 #status and error messages
 MSGLIST = ["Only sessions to/from the first IP found are analyzed", \
@@ -66,6 +66,8 @@ class Segment:
         self.frame=int(items[0])
         self.time=float(items[1])
         self.type=int(items[7],0)
+        if self.type >=12:
+            MSGSTATUS[2]=True
         ips=items[2].split(",")
         self.ports=items[3].split(",")
         if self.type < 8 or self.type == 9 or self.type == 12 or self.type == 15:
@@ -77,7 +79,11 @@ class Segment:
         else:
             MSGSTATUS[4] = True
 
-        self.session=int(items[4])
+# Cancel acknowlegements do not contain a session number
+        if items[4] == "" :
+            self.session = -1
+        else:
+            self.session=int(items[4])
 
         if self.type < 8:
             self.offset=int(items[5])
@@ -151,10 +157,11 @@ for segment in segList:
     if segment.dsource == source:
         currTime=segment.time-time0
         currSession=segment.session
-        if currSession not in session_list.keys():
-            session_list[currSession]=SessionData(segment)
-        else:
-            session_list[currSession].update(segment)
+        if currSession >= 0:
+            if currSession not in session_list.keys():
+                session_list[currSession]=SessionData(segment)
+            else:
+                session_list[currSession].update(segment)
     else:
         MSGSTATUS[0] = True
 
