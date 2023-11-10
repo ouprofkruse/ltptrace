@@ -45,6 +45,7 @@
 #import math
 import sys
 import os
+import argparse
 from operator import itemgetter
 
 VERSION = "0.8.1"
@@ -57,7 +58,8 @@ MSGLIST = ["Only sessions to/from the first IP found are analyzed", \
            "Undefined control segment seen" \
            ]
 MSGSTATUS = [False, False, False, False, False]
-
+COLORS = {"blue":1,"green":2,"red":3}
+COLORS_OLD = {"blue":3,"green":1,"red":2}
 
 class Segment:
     def __init__(self,datastring):
@@ -130,10 +132,17 @@ class SessionData:
 print("ltptrace version",VERSION)
 segList = []
 session_list = {}
-if (len(sys.argv) < 2):
-    print("Usage: python ltptrace.py <filename>")
-    quit()
-INFILE=sys.argv[1]
+#if (len(sys.argv) < 2):
+#    print("Usage: python ltptrace.py <filename>")
+#    quit()
+
+parser = argparse.ArgumentParser()
+parser.add_argument("infile")
+parser.add_argument("--oldxplot", action="store_true", help="make output compatible with the original xplot program")
+args = parser.parse_args()
+INFILE = args.infile
+
+# INFILE=sys.argv[1]
 #INFILE = "ltp-summary.txt" # need to pull file from command line late
 infilename=os.path.basename(INFILE)
 #PLOTFILE = "ltp-summary.xpl"
@@ -142,9 +151,14 @@ while (infilename[1] != ""):
     infilename = os.path.splitext(infilename[0])
 
 PLOTFILE = infilename[0]+".xpl"
-print("Writing to",PLOTFILE)
 
 ofh = open(PLOTFILE,"w")
+print("Writing to",PLOTFILE)
+if args.oldxplot :
+    print("Output can be read by the original xplot program")
+    print("double double", file=ofh)
+    COLORS = COLORS_OLD
+
 ifh = open(INFILE)
 for line in ifh.readlines():
     segList.append(Segment(line))
@@ -194,11 +208,19 @@ for index in session_sorted:
         currTime=segment.time-time0
         currSession=segment.session
         if segment.type < 8 :
-            print("darrow",currTime,segment.offset+yshift,file=ofh)
+            if segment.exc:
+                p_color=COLORS["green"]
+            else:
+                p_color=COLORS["red"]
             print("rtext",currTime,segment.offset+yshift,file=ofh)
             print("_",currSession,file=ofh)
-            print("uarrow",currTime,segment.offset+segment.length+yshift,file=ofh)
-            print("line",currTime,segment.offset+yshift,currTime,segment.offset+segment.length+yshift,file=ofh)
+            if args.oldxplot :
+                print("darrow",currTime,segment.offset+yshift,p_color,file=ofh)
+                print("uarrow",currTime,segment.offset+segment.length+yshift,p_color,file=ofh)
+                print("line",currTime,segment.offset+yshift,currTime,segment.offset+segment.length+yshift,p_color,file=ofh)
+            else:
+                print("line",currTime,segment.offset+yshift,currTime,segment.offset+segment.length+yshift,p_color,file=ofh)
+
         elif segment.type == 8 :
 #            print("Report segment at",currTime,",",segment.rptCount,"claims")
             for i in range(0,segment.rptCount) :
